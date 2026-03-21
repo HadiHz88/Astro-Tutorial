@@ -1,13 +1,18 @@
 ---
+import type { GetStaticPaths } from "astro";
 import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import BlogPost from "../../components/BlogPost.astro";
+import type { Tag, TagPageProps } from "../../types/content";
 
-export async function getStaticPaths() {
+export const getStaticPaths = (async () => {
   const allPosts = await getCollection("blog");
-  const uniqueTags = [
-    ...new Set(allPosts.map((post) => post.data.tags).flat()),
-  ];
+  const uniqueTags: Tag[] = Array.from(
+    allPosts.reduce((acc, post) => {
+      post.data.tags.forEach((tag) => acc.add(tag));
+      return acc;
+    }, new Set<Tag>()),
+  );
 
   return uniqueTags.map((tag) => {
     const filteredPosts = allPosts.filter((post) =>
@@ -18,10 +23,13 @@ export async function getStaticPaths() {
       props: { posts: filteredPosts },
     };
   });
-}
+}) satisfies GetStaticPaths;
 
 const { tag } = Astro.params;
-const { posts } = Astro.props;
+if (!tag) {
+  throw new Error("Missing tag route parameter");
+}
+const { posts } = Astro.props as TagPageProps;
 ---
 
 <BaseLayout pageTitle={tag}>

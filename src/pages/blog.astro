@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import BlogPost from "../components/BlogPost.astro";
+import type { BlogPost as BlogPostEntry } from "../types/content";
 
 const allPosts = await getCollection("blog");
 const pageTitle = "My Astro Learning Blog";
@@ -11,7 +12,7 @@ const pageTitle = "My Astro Learning Blog";
   <p>This is where I will post about my journey learning Astro.</p>
   <ul>
     {
-      allPosts.map((post: any) => (
+      allPosts.map((post: BlogPostEntry) => (
         <BlogPost url={`/posts/${post.id}/`} title={post.data.title} />
       ))
     }
